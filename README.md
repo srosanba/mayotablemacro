@@ -1,4 +1,4 @@
-The macros being modified in this repository are from a paper presention from [SGF 2012](http://support.sas.com/resources/papers/proceedings12/345-2012.pdf).
+The macros being modified in this repository are from a paper presention at [SGF 2012](http://support.sas.com/resources/papers/proceedings12/345-2012.pdf).
 
 There are three macros: table, tablemrg, and stable. 
 
