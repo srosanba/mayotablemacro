@@ -34,12 +34,13 @@ Kaitie's Wish List of Updates
   **Question**: would you want RT4-friendly syntax for superscripts in the new variable (pvalue_rt4), or simply strip out the superscript part (pvalue_plain), or both versions?
 1. Spacing  
   a. Currently every variable has a space between it and the next variable in the table. For long tables, it would be nice to be able to remove that extra line space if needed.  
-  **Thought**: should be straightforward with last-dot logic.
+  **Thought**: should be straightforward with last-dot logic.  
+  **RESOLUTION**: added parameter VARSPACE. Default is Y. Use N to remove space (i.e., empty row) between variables.
 1. ODS Output Stream  
   a. Currently, only output option is RTF. It would be nice to have a PDF option.  
   **Thought**: seems likely to be straightforward, depending on whether or not RTF-centric ODS options are used. Possible implementation would be to introduce OUTRTF and OUTPDF as macro options (with OUTDOC taking a back seat). This is slightly entangled with the LIST= macro parameter.  
-  **Resolution**: added parameter OUTPDF. 
+  **RESOLUTION**: added parameter OUTPDF. Specify full path and name of desired file. 
 1. Put nbys in macro variables  
   a. Currently NBY is a variable in the output dataset. Would be GREAT if the BY variable names and numbers were put into macro variables to be later called by RhoTables.  
   **Thought**: should be straightforward.  
-  **Resolution**: already present as a local macro variable. Added %global statement to make accessible externally.
+  **RESOLUTION**: already present as a local macro variable. Added %global statement to make accessible externally.
