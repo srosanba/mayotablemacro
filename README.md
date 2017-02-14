@@ -31,7 +31,8 @@ Kaitie's Wish List of Updates
 1. Character pvalues compatible with RhoTables  
   a. Currently p-values are output as character with ‘~’ to print super scripts. You either have to strip the pvalue of the superscript or find the correct numeric p-value to convert it to character before passing to RhoTables. Would be nice if this variable were already created.  
   **Thought**: should be straightforward with a new variable.  
-  **Question**: would you want RT4-friendly syntax for superscripts in the new variable (pvalue_rt4), or simply strip out the superscript part (pvalue_plain), or both versions?
+  **Question**: would you want RT4-friendly syntax for superscripts in the new variable (pvalue_rt4), or simply strip out the superscript part (pvalue_plain), or both versions?  
+  **RESOLUTION**: added numeric variables PVALUEN (the p-value itself) and PVALUESUP (the superscript) to OUTDAT. 
 1. Spacing  
   a. Currently every variable has a space between it and the next variable in the table. For long tables, it would be nice to be able to remove that extra line space if needed.  
   **Thought**: should be straightforward with last-dot logic.  
