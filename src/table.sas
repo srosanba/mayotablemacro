@@ -305,6 +305,9 @@
    | SPACE = cell spacing (default sets cellpadding=2)
    |         1=pack; sets cellpadding=1
    |         2=expand; sets cellpadding=4
+   | VARSPACE = whether or not to put a space (i.e., blank line) between
+   |            variables
+   |            (default=N)
    |
    | ~ MORE OPTIONAL PARAMETERS~
    | **** PLEASE REFER TO THE REFERENCE SECTION DOWN THE PAGE ****
@@ -391,6 +394,16 @@
    |
    | Paul Novotny 11/1/2011: Fixed the problem that caused
    | by by= value when a permanent dataset is used in dsn=.
+   |
+   *------------------------------------------------------------------*
+   | MODIFIED BY : Rosanbalm, Shane              (02/14/2017 08:54)
+   |
+   | Shane Rosanbalm 2017-02-14: 
+   |     Made NBY a global macro variable.
+   |     Added OUTPDF option to create PDF files.
+   |     Added VARSPACE option to remove space between variables.
+   |     Added variables PVALUEN, PVALUESUP to output dataset.
+   |     Added OUTSHELL option to create shell dataset.
    |
    *------------------------------------------------------------------*
    | OPERATING SYSTEM COMPATIBILITY
@@ -481,7 +494,8 @@
    *------------------------------------------------------------------*
    | REFERENCES
    |
-   | %MACRO TABLE(DSN=_last_, BY=, VAR=, TYPE=, OUTDOC=, OUTDAT=,
+   | %MACRO TABLE(DSN=_last_, BY=, VAR=, TYPE=, OUTDOC=, 
+   |              OUTPDF=, OUTSHELL=, OUTDAT=,
    |              PCTTYPE=COL, CSTATS=n mean sd median quartiles range,
    |              DSTATS=n percent, pfoot=n,
    |              PTYPE=, TLOC=0, PNORM=0.05, PVAR=0.05, PVALUES=Y,
@@ -497,7 +511,7 @@
    |              TITLEFNT=Times New Roman, RULES=groups, FRAME=hsides,
    |              HEADFNT=Times New Roman, BODYFNT=Times New Roman,
    |              LABELWD=50, LABELWRAP=N, CIWD=, PVALWD=100,
-   |              LEVELWD=, DATAWD=, SPACE=,
+   |              LEVELWD=, DATAWD=, SPACE=, VARSPACE=Y,
    |              POP=, LIST=N, PRINT=N, ID=, DEBUG=N);
    |
    | ~Required PARAMETERS~
@@ -555,7 +569,18 @@
    |          if no directory is defined, document will be stored in
    |          directory from where the program is run If left blank,
    |          no document will be created.
-   |         (default=none)
+   |          (default=none)
+   |
+   | OUTPDF = name of PDF file created
+   |          Must contain full file path,
+   |             i.e. H:/mayo/testing/demogtable.pdf
+   |          If left blank, no file will be created.
+   |          (default=none)
+   |
+   | OUTSHELL = name of SAS dataset created with can then be used with
+   |            tablemrg macaro. 
+   |            If left blank, no dataset will be created.
+   |            (default=none)
    |
    | OUTDAT = name of SAS dataset created which can then be used with
    |          tablemerge.macro. If left blank, no dataset will be created.
@@ -588,7 +613,8 @@
    | General Public License for more details.
    *------------------------------------------------------------------*/
  
-%MACRO TABLE(DSN=_last_, BY=, VAR=, TYPE=, OUTDOC=, OUTDAT=,
+%MACRO TABLE(DSN=_last_, BY=, VAR=, TYPE=, OUTDOC=, 
+             OUTPDF=, OUTSHELL=, OUTDAT=,
              PCTTYPE=COL, CSTATS=n mean sd median quartiles range,
              DSTATS=n percent, pfoot=n,
              PTYPE=, TLOC=0, PNORM=0.05, PVAR=0.05, PVALUES=Y,
@@ -604,7 +630,7 @@
              TITLEFNT=Times New Roman, RULES=groups, FRAME=hsides,
              HEADFNT=Times New Roman, BODYFNT=Times New Roman,
              LABELWD=50, LABELWRAP=N, CIWD=, PVALWD=100,
-             LEVELWD=, DATAWD=, SPACE=,
+             LEVELWD=, DATAWD=, SPACE=, VARSPACE=Y,
              POP=, LIST=N, PRINT=N, ID=, DEBUG=N);
  
  
@@ -707,6 +733,7 @@
  /*****************************************/
  /* checks whether there is a BY variable */
  /*****************************************/
+ %global nby;
  %if (&by=) %then %do;
     %let total = N;
     %let noby  = 1;
@@ -2815,6 +2842,51 @@
      if (last) then delete;
      run;
  
+   /**********************************/
+   /* remove space between variables */
+   /**********************************/
+   %let varspace = %upcase(&varspace);
+   %if &varspace eq N %then %do;
+      data _mst;
+         set _mst end=eof;
+         by nvar;
+         if last.nvar and level = "" and not eof then
+            delete;
+      run;
+   %end;
+
+   /*************************************/
+   /* create alternate pvalue variables */
+   /*************************************/
+   %macro VarExist(data=,var=);
+      %local dsid varnum rc;
+      %let dsid = %sysfunc(open(&data)); 
+      %if &dsid %then %do; 
+         %let varnum = %sysfunc(varnum(&dsid,&var));
+         %if &varnum %then 
+            &varnum; 
+         %else 
+            0;
+         %let rc = %sysfunc(close(&dsid));
+      %end;
+      %else 
+         0;
+   %mend VarExist;
+   %if %VarExist(data=_mst,var=pvalue) %then %do;
+      data _mst;
+         set _mst;
+         if pvalue ne "" then do;
+            pvaluen = input(scan(pvalue,1,"~"),best.);
+            leftbracket = index(pvalue,"{");
+            rightbracket = index(pvalue,"}");
+            startsubstr = leftbracket + 7;
+            lengthsubstr = rightbracket - leftbracket - 7;
+            pvaluesup = input(substr(pvalue,startsubstr,lengthsubstr),best.);
+            drop leftbracket rightbracket startsubstr lengthsubstr;
+         end;
+      run;
+   %end;
+     
    /**************************************/
    /* adds in any comments for the table */
    /* and deletes specified lines        */
@@ -2998,7 +3070,11 @@
              ods rtf file="&outdoc..doc" style=newtable;
           %end;
           %else %do;
-              ods rtf file="&outdoc." style=newtable;
+             ods rtf file="&outdoc." style=newtable;
+          %end;
+          
+          %if %nrbquote(&outpdf) ne %str() %then %do;
+             ods pdf file="&outpdf" style=newtable;
           %end;
  
           %if &pfoot=Y %then %do;
@@ -3184,15 +3260,22 @@
           run;
  
        ods rtf close;
+       %if %nrbquote(&outpdf) ne %str() %then %do;
+          ods pdf close;
+       %end;
        ods listing;
  
        %if "&doctype"="0" %then %do;
           %put Created File: &outdoc..doc;
        %end;
- 
        %else %do;
           %put Created File: &outdoc.;
        %end;
+       
+       %if %nrbquote(&outpdf) ne %str() %then %do;
+          %put Created File: &outpdf;
+       %end;
+       
     %end;
  
     /**************************/
@@ -3273,20 +3356,41 @@
            output;
         run;
      %end;
- 
+     
+   /********************************/
+   /* creates the outshell dataset */
+   /********************************/
+   %if &outshell ne %str() and &outdat eq %str() %then
+      %put %str(W)ARNING: OUTSHELL depends on OUTDAT!!!;
+   %if &outshell ne %str() %then %do;
+      data &outshell;
+         set &outdat;
+         %macro num2x(var);
+            &var = translate(&var,"xxxxxxxxxx","0123456789");
+         %mend num2x;
+         %do i = 1 %to &nby;
+            %num2x(c&i);
+         %end;
+         %num2x(ctotal);
+         %num2x(pvalue);
+      run;
+   %end;
+   
      /*************************************/
      /* cleans up the temporary data sets */
      /*************************************/
  
-     proc datasets nolist;
-        delete _c2_ _check _c_ _d01 _d02 _d1 _d2 _dall _f1 _n _f _e _e0
-               _final _level _master _mst _tmp _tmp_ _sumry_ _x1
-               _t _all _tot _p _mean _med _range _cv _blank _tot_
-               _counts_ _lr1 _lr2 _lrmstr _tmp1_ _nmiss _quart
-               _ttest _tmp1 _tmp2 %do i = 1 %to &nby; _c&i %end;
-               _equality _est _estall _lr _medall _n2;
-     run;
-     quit;
+     %if &debug eq N %then %do;
+        proc datasets nolist;
+           delete _c2_ _check _c_ _d01 _d02 _d1 _d2 _dall _f1 _n _f _e _e0
+                  _final _level _master _mst _tmp _tmp_ _sumry_ _x1
+                  _t _all _tot _p _mean _med _range _cv _blank _tot_
+                  _counts_ _lr1 _lr2 _lrmstr _tmp1_ _nmiss _quart
+                  _ttest _tmp1 _tmp2 %do i = 1 %to &nby; _c&i %end;
+                  _equality _est _estall _lr _medall _n2;
+        run;
+        quit;
+     %end;
  
      /*** Added 2/10/2011: Restores the ODS path to its original state and delete
           the entire SASUSER.Templat library of customized templates
