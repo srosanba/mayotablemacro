@@ -40,4 +40,5 @@ Kaitie's Wish List of Updates
   **Thought**: seems likely to be straightforward, depending on whether or not RTF-centric ODS options are used. Possible implementation would be to introduce OUTRTF and OUTPDF as macro options (with OUTDOC taking a back seat). This is slightly entangled with the LIST= macro parameter.
 1. Put nbys in macro variables  
   a. Currently NBY is a variable in the output dataset. Would be GREAT if the BY variable names and numbers were put into macro variables to be later called by RhoTables.  
-  **Thought**: should be straightforward.
+  **Thought**: should be straightforward.  
+  **Resolution**: already present as a local macro variable. Added %global statement to make accessible externally.
