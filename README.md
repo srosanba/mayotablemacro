@@ -27,7 +27,8 @@ Kaitie's Wish List of Updates
   **Thought**: the two-call process could run afoul of differing numbers of rows in the output for the two calls. Think about ways to possibly avoid this issue. Would be a potential problem for the nesting approach as well.
 1. Output Shells  
   a. Would be AMAZING if when a table was output, a specs shell would also get output!  
-  **Thought**: since table is built in a dataset first, and since all columns are character variables, should be straightforward to create a specs shell with the translate function.
+  **Thought**: since table is built in a dataset first, and since all columns are character variables, should be straightforward to create a specs shell with the translate function.  
+  **RESOLUTION**: added parameter OUTSHELL. Specify name of dataset to create with Xs in place of numbers. Then call `%tablemrg` with that dataset. Not perfect yet as the header N values are not converted to Xs. 
 1. Character pvalues compatible with RhoTables  
   a. Currently p-values are output as character with ‘~’ to print super scripts. You either have to strip the pvalue of the superscript or find the correct numeric p-value to convert it to character before passing to RhoTables. Would be nice if this variable were already created.  
   **Thought**: should be straightforward with a new variable.  
