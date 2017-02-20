@@ -18,7 +18,9 @@ Kaitie's Wish List of Updates
   a. Will do missing in the BY statement and include or exclude this group from analyses.  Will also display a missing level within a variable. It will not display missing BY values AND missing variables AND do analyses/summaries (only Ns).  
   **Thought**: I fear that this is very much baked into the fabric of the macro.  
   b. Would be nice to have a ‘Shell’ for data without missing values when other variables have missing values.  
-  **Question**: unclear what is being asked for.
+  **Question**: unclear what is being asked for.  
+  **Clarification**: So essentially when you ask for the missing option and a variable has missing values it will display that as a row with ‘Missing’ in the level variable and the number missing in each column.  However, if you specify the missing option and a variable has no missing values, the row with ‘Missing’ is NOT displayed.  This sometimes can be problematic when you want to merge tables together to make one big table as the _line variables gets kinda messed up.  So, I was thinking, it would be nice if when you specify the missing option a ‘Missing’ level ALWAYS shows up even if there isn’t any missing data and the columns just have ‘0’ in them.  
+  **Thought**: seems like this shouldn't be too bad.
 1. Dual By Statements  
   a. If you want to have two by groups (i.e. treatment within stratum) you have to make 4 different groups and the display doesn’t look great.  
   **Question**: is this merely because of the repeated text in the column header, or does it not look great in some other way?  
